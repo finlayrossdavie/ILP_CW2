@@ -6,12 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
+public class NextPositionRequest {
+  @JsonProperty("start")
+  private Position position;
 
-public class LngLatPairRequest {
-  @JsonProperty("position1")
-  private Position position1;
-
-  @JsonProperty("position2")
-  private Position position2;
+  @JsonProperty("angle")
+  private Double angle;
 
 }

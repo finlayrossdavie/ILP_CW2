@@ -1,8 +1,5 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 
-import static uk.ac.ed.inf.ilp_cw1.service.Calculations.colinear;
-
-import uk.ac.ed.inf.ilp_cw1.Data.LngLatPairRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.Position;
 import uk.ac.ed.inf.ilp_cw1.Data.Region;
 
@@ -21,7 +18,7 @@ public class Validations {
       return false;
     }
 
-    return !(angle > 360.0) && !(angle < 0.0);
+    return !(angle > 360.0) && !(angle < 0.0) || !(angle==900);
   }
 
   public static boolean isValid(Region region) {
@@ -29,14 +26,17 @@ public class Validations {
     Position[] vertices = region.getVertices();
 
     int n = vertices.length;
-
-    if (n < 3) {
+/*
+    if (colinear(vertices)){
       return false;
     }
 
-    if (!(vertices[0].isEqual(vertices[n - 1])))
-      return false;
 
-    return !colinear(vertices);
+*/
+    if(n < 3){
+      return false;
+    }
+
+    return vertices[0].isEqual(vertices[n - 1]);
   }
 }

@@ -1,27 +1,21 @@
 package uk.ac.ed.inf.ilp_cw1.controllers;
 
 
+import static uk.ac.ed.inf.ilp_cw1.service.Calculations.collinear;
 import static uk.ac.ed.inf.ilp_cw1.service.Calculations.nextPos;
 import static uk.ac.ed.inf.ilp_cw1.service.Validations.isValid;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.StreamingHttpOutputMessage.Body;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpServerErrorException;
 import uk.ac.ed.inf.ilp_cw1.Data.LngLatPairRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.NextPositionRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.isInRegionRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.Position;
 import uk.ac.ed.inf.ilp_cw1.service.Calculations;
-import uk.ac.ed.inf.ilp_cw1.service.Validations;
 
 @RestController
 public class BasicController {
@@ -51,8 +45,8 @@ public class BasicController {
 
   }
 
-  @PostMapping("/isClose")
-  public ResponseEntity<?> isClose(@RequestBody LngLatPairRequest request){
+  @PostMapping("/isCloseTo")
+  public ResponseEntity<?> isCloseTo(@RequestBody LngLatPairRequest request){
     if (request == null || !isValid(request.getPosition2()) || !isValid(request.getPosition1())){              //TODO: Improve poor input handling, in particular null lat and lng
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Invalid JSON structure");
     }
@@ -82,15 +76,16 @@ public class BasicController {
   }
 
   @PostMapping("/isInRegion")
-  public boolean isInRegion(@RequestBody isInRegionRequest request, HttpServletResponse response){
+  public ResponseEntity<?> isInRegion(@RequestBody isInRegionRequest request){
     if (request == null || !isValid(request.getPosition()) || !isValid(request.getRegion())){
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      return false;
+      return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Invalid input");
     }
 
-    return true;
+    if (collinear(request.getRegion().getVertices())){
+      return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Points are collinear, thus invalid region");
+    }
 
-
+    return ResponseEntity.status(HttpServletResponse.SC_OK).body(request.getRegion().isInside(request.getPosition()));
 
   }
 }

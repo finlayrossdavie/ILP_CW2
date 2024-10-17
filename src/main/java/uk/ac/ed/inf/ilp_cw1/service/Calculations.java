@@ -1,9 +1,7 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 import static uk.ac.ed.inf.ilp_cw1.service.Validations.isValid;
 
-import java.util.Objects;
 import uk.ac.ed.inf.ilp_cw1.Data.Position;
-import uk.ac.ed.inf.ilp_cw1.Data.Region;
 
 public class Calculations {
 
@@ -14,6 +12,11 @@ public class Calculations {
   }
 
   public static Position nextPos(Position p1, Double angle){
+
+    if (angle==900){
+      return p1;
+    }
+
     double new_lng =  p1.getLng() + 0.00015*Math.sin(angle);
     double new_lat =  p1.getLat() + 0.00015*Math.cos(angle);
 
@@ -25,34 +28,31 @@ public class Calculations {
     return result;
   }
 
-  public static boolean colinear(Position[] vertices) {
-
+  public static boolean collinear(Position[] vertices) {
     int n = vertices.length;
 
-    if (!(vertices[0].isEqual(vertices[n - 1])))
-      return false;
 
-    boolean x_colinear = true;
-    boolean y_colinear = true;
-
-    int i = 0;
-
-    while (x_colinear || y_colinear && i < n - 2) {
-
-      if (!Objects.equals(vertices[i].getLng(), vertices[i + 1].getLng())) {
-        x_colinear = false;
+    for (int i = 1; i < n - 1; i++) {
+      if (!areCollinear(vertices[i - 1], vertices[i], vertices[i + 1])) {
+        return false;  // If any set of three points is not collinear, return false
       }
-
-      if (!Objects.equals(vertices[i].getLat(), vertices[i + 1].getLat())) {
-        y_colinear = false;
-      }
-      i++;
     }
-    return x_colinear || y_colinear;
+
+    // Close the polygon by checking the last vertex and the first two vertices
+    return areCollinear(vertices[n - 2], vertices[n - 1], vertices[0]);
   }
 
-  public static boolean isIn(Position position, Region region){
-    return isValid(position) && isValid(region);
+
+  public static boolean areCollinear(Position a, Position b, Position c) {
+    double epsilon = 1e-4;  // Tolerance for floating-point comparisons
+
+    // Calculate the slope difference between points
+    double area = a.getLat() * (b.getLng() - c.getLng()) +
+        b.getLat() * (c.getLng() - a.getLng()) +
+        c.getLat() * (a.getLng() - b.getLng());
+
+    // Check if the slopes are approximately equal
+    return Math.abs(area) < epsilon;
   }
   }
 

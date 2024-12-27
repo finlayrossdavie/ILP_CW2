@@ -10,6 +10,16 @@ public class Validations {
     if (position == null){
       return false;
     }
+    //TODO check out of bounds defintion
+
+    if ((position.getLat() >= 100) || (position.getLat() <= -100)){
+      return false;
+    }
+
+    if((position.getLng() > 100) || (position.getLng() <= -100)){
+      return false;
+    }
+
     return position.getLng() != null && position.getLat() != null;
   }
 

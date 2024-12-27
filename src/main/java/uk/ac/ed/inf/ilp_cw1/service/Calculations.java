@@ -44,7 +44,7 @@ public class Calculations {
 
 
   public static boolean areCollinear(Position a, Position b, Position c) {
-    double epsilon = 1e-4;  // Tolerance for floating-point comparisons
+    double epsilon = 1e-6;  // Tolerance for floating-point comparisons
 
     // Calculate the slope difference between points
     double area = a.getLat() * (b.getLng() - c.getLng()) +

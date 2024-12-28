@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 
+
 import uk.ac.ed.inf.ilp_cw1.Data.Position;
 import uk.ac.ed.inf.ilp_cw1.Data.Region;
 
@@ -49,4 +50,5 @@ public class Validations {
 
     return vertices[0].isEqual(vertices[n - 1]);
   }
+
 }

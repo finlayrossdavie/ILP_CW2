@@ -47,5 +47,6 @@ public interface OrderValidation {
   Boolean isValidNumPizzas(int numPizzas);
   Boolean isValidPizzas(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
   Boolean isCorrectPizzaPrice(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
+  Pizza getRestaurantPizzaRecord(Pizza pizzaInOrder, Restaurant[] definedRestaurants);
 
 }

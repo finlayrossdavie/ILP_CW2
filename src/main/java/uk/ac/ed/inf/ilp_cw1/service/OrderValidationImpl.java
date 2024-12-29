@@ -102,21 +102,35 @@ public class OrderValidationImpl implements OrderValidation{
   }
 
   @Override
+  public Pizza getRestaurantPizzaRecord(Pizza pizzaInOrder, Restaurant[] definedRestaurants) {
+    boolean found = false;
+
+    Pizza result = null;
+
+    for (Restaurant restaurant : definedRestaurants) {
+      for (Pizza item : restaurant.menu()) {
+        if ((Objects.equals(pizzaInOrder.name(), item.name()))) {
+          found = true;
+          result = item;
+          break;
+        }
+      }
+    }
+
+    if (found){
+      return result;
+    }else{
+      return null;
+    }
+  }
+
+
+  @Override
   public Boolean isValidPizzas(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants) {
 
     for (Pizza pizza : pizzasInOrder) {
-
-      boolean found = false;
-
-      for (Restaurant restaurant : definedRestaurants) {
-        for (Pizza item : restaurant.menu()) {
-          if (Objects.equals(pizza.name(), item.name())) {
-            found = true;
-            break;
-          }
-        }
-      }
-      if (!found) {
+      Pizza correctPizza = getRestaurantPizzaRecord(pizza, definedRestaurants);
+      if (correctPizza == null) {
         return false;
       }
     }
@@ -127,21 +141,18 @@ public class OrderValidationImpl implements OrderValidation{
   public Boolean isCorrectPizzaPrice(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants) {
 
     for (Pizza pizza : pizzasInOrder) {
-
-      boolean found = false;
-
-      for (Restaurant restaurant : definedRestaurants) {
-        for (Pizza item : restaurant.menu()) {
-          if ((Objects.equals(pizza.name(), item.name())) && (pizza.priceInPence() == item.priceInPence())) {
-            found = true;
-            break;
-          }
-        }
-      }
-      if (!found) {
+      Pizza correctPizza = getRestaurantPizzaRecord(pizza, definedRestaurants);
+      if (correctPizza == null) {
+        return false;
+      } else if (correctPizza.priceInPence() != pizza.priceInPence()) {
         return false;
       }
     }
     return true;
   }
+
+  //TODO Total Incorrect (total value of pizzas)
+  //TODO Pizza from multiple restaurants (Pizza's were ordered from multiple restaurants)
+  //TODO Price restaurant closed (Restaurant closed on the order day)
+  //TODO Empty Order
 }

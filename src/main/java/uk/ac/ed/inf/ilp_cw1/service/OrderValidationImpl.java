@@ -1,11 +1,13 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import uk.ac.ed.inf.ilp_cw1.Data.Order;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderStatus;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
@@ -13,58 +15,73 @@ import uk.ac.ed.inf.ilp_cw1.Data.Pizza;
 import uk.ac.ed.inf.ilp_cw1.Data.Restaurant;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
 
-public class OrderValidationImpl implements OrderValidation{
-
+public class OrderValidationImpl implements OrderValidation {
 
   @Override
   public Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants) {
 
     OrderStatus orderStatus = OrderStatus.VALID;
 
-    if (!(isValidCreditCardNumber(orderToValidate.getCreditCardInformation().getCreditCardNumber()))){
+
+    if (!(isValidCreditCardNumber(
+        orderToValidate.getCreditCardInformation().getCreditCardNumber()))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.CARD_NUMBER_INVALID);
     }
 
-    if (!(isValidCVVNumber(orderToValidate.getCreditCardInformation().getCvv()))){
+    if (!(isValidCVVNumber(orderToValidate.getCreditCardInformation().getCvv()))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.CVV_INVALID);
     }
 
-    if (!(isValidExpiryDate(orderToValidate.getCreditCardInformation().getCreditCardExpiry()))){
+    if (!(isValidExpiryDate(orderToValidate.getCreditCardInformation().getCreditCardExpiry()))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
     }
 
-    if (!(isValidNumPizzas(orderToValidate.getPizzasInOrder().length))){
+    if (!(isValidNumPizzas(orderToValidate.getPizzasInOrder().length))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.MAX_PIZZA_COUNT_EXCEEDED);
     }
 
-    if(orderToValidate.getPizzasInOrder().length == 0){
+    if (orderToValidate.getPizzasInOrder().length == 0) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.EMPTY_ORDER);
     }
 
-    if(!(isValidPizzas(orderToValidate.getPizzasInOrder(), definedRestaurants))){
+    if (!(isValidPizzas(orderToValidate.getPizzasInOrder(), definedRestaurants))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
     }
 
-    if(!(isCorrectPizzaPrice(orderToValidate.getPizzasInOrder(), definedRestaurants))){
+    if (!(isCorrectPizzaPrice(orderToValidate.getPizzasInOrder(), definedRestaurants))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.PRICE_FOR_PIZZA_INVALID);
     }
 
+    if (!(isTotalCorrect(orderToValidate.getPizzasInOrder(), definedRestaurants,
+        orderToValidate.getPriceTotalInPence()))) {
+      orderStatus = OrderStatus.INVALID;
+      orderToValidate.setOrderValidationCode(OrderValidationCode.TOTAL_INCORRECT);
+    }
+
+    if(!(isOneRestaurant(orderToValidate.getPizzasInOrder(), definedRestaurants))){
+      orderStatus = OrderStatus.INVALID;
+      orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
+    }
+
+    if(!(isRestaurantOpen(orderToValidate.getPizzasInOrder(), definedRestaurants, orderToValidate.getOrderDate()))){
+      orderStatus = OrderStatus.INVALID;
+      orderToValidate.setOrderValidationCode(OrderValidationCode.RESTAURANT_CLOSED);
+    }
 
     orderToValidate.setOrderStatus(orderStatus);
-
     return orderToValidate;
   }
 
   @Override
   public Boolean isValidCreditCardNumber(String creditCardNumber) {
-    if (creditCardNumber.length() != 16){
+    if (creditCardNumber.length() != 16) {
       return false;
     }
     return Integer.parseInt(creditCardNumber) >= 0;
@@ -72,7 +89,7 @@ public class OrderValidationImpl implements OrderValidation{
 
   @Override
   public Boolean isValidCVVNumber(String CVV) {
-    if (CVV.length() != 3){
+    if (CVV.length() != 3) {
       return false;
     } else
       return Integer.parseInt(CVV) >= 0 && Integer.parseInt(CVV) <= 999;
@@ -117,14 +134,12 @@ public class OrderValidationImpl implements OrderValidation{
       }
     }
 
-    if (found){
+    if (found) {
       return result;
-    }else{
+    } else {
       return null;
     }
   }
-
-
   @Override
   public Boolean isValidPizzas(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants) {
 
@@ -151,8 +166,67 @@ public class OrderValidationImpl implements OrderValidation{
     return true;
   }
 
-  //TODO Total Incorrect (total value of pizzas)
-  //TODO Pizza from multiple restaurants (Pizza's were ordered from multiple restaurants)
-  //TODO Price restaurant closed (Restaurant closed on the order day)
-  //TODO Empty Order
+
+  @Override
+  public Boolean isTotalCorrect(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants,
+      int orderTotal) {
+    int total = 0;
+    for (Pizza pizza : pizzasInOrder) {
+      Pizza correctPizza = getRestaurantPizzaRecord(pizza, definedRestaurants);
+      if (correctPizza == null) {
+        return false;
+      } else if (correctPizza.priceInPence() != pizza.priceInPence()) {
+        return false;
+      } else {
+        total += total + correctPizza.priceInPence();
+      }
+    }
+    return (total == orderTotal);
+  }
+
+  /*
+  Function which returns the restaurant which all pizza's in the order come from. Returns null if
+  more than one restaurant is in the order.
+   */
+  @Override
+  public Restaurant getOrderRestaurant(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants) {
+    Restaurant tempRestaurant = null;
+
+    for (Pizza pizzaInOrder : pizzasInOrder) {
+      for (Restaurant restaurant : definedRestaurants) {
+        for (Pizza item : restaurant.menu()) {
+          if ((Objects.equals(pizzaInOrder.name(), item.name()))) {
+
+            if ((tempRestaurant != null) && (tempRestaurant != restaurant)) {
+              return null;
+            }
+            tempRestaurant = restaurant;
+            break;
+          }
+        }
+      }
+    }
+    return tempRestaurant;
+  }
+
+  @Override
+  public Boolean isOneRestaurant(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants) {
+    return (getOrderRestaurant(pizzasInOrder, definedRestaurants) != null);
+  }
+  @Override
+  public Boolean isRestaurantOpen(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants, LocalDate orderDate) {
+    Restaurant orderRestaurant = getOrderRestaurant(pizzasInOrder, definedRestaurants);
+    if(orderRestaurant == null){
+      return false;
+    }
+
+    DayOfWeek[] openingDays = orderRestaurant.openingDays();
+
+    for(DayOfWeek openDay : openingDays){
+      if (openDay == orderDate.getDayOfWeek()){
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -37,16 +37,18 @@ public interface OrderValidation {
    * @return the validated order
    */
 
-
-
   Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants);
-
   Boolean isValidCreditCardNumber(String creditCardNumber);
   Boolean isValidCVVNumber(String CVV);
   Boolean isValidExpiryDate(String expiryDate);
   Boolean isValidNumPizzas(int numPizzas);
   Boolean isValidPizzas(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
   Boolean isCorrectPizzaPrice(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
+  Boolean isTotalCorrect(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants, int orderTotal);
+  Boolean isOneRestaurant(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
+  Boolean isRestaurantOpen(Pizza[]pizzasInOrder, Restaurant[] definedRestaurants, LocalDate orderDate);
   Pizza getRestaurantPizzaRecord(Pizza pizzaInOrder, Restaurant[] definedRestaurants);
+  Restaurant getOrderRestaurant(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
+  //TODO Empty Order
 
 }

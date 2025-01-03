@@ -41,8 +41,6 @@ public class Validations {
     if (colinear(vertices)){
       return false;
     }
-
-
 */
     if(n < 3){
       return false;

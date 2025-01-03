@@ -41,5 +41,29 @@ public final class SystemConstants {
    * Latitude AT
    */
   public static final double APPLETON_LAT = 55.944494;
+  public static final Region CENTRAL_REGION;
 
+  static {
+    Position[] vertices = new Position[4];
+
+    vertices[0] = new Position();
+    vertices[0].setLng(-3.192473);
+    vertices[0].setLat(55.946233);
+
+    vertices[1] = new Position();
+    vertices[1].setLng(-3.184319);
+    vertices[1].setLat(55.946233);
+
+    vertices[2] = new Position();
+    vertices[2].setLng(-3.192473);
+    vertices[2].setLat(55.942617);
+
+    vertices[3] = new Position();
+    vertices[3].setLng(-3.184319);
+    vertices[3].setLat(55.942617);
+
+    CENTRAL_REGION = new Region();
+    CENTRAL_REGION.setName(CENTRAL_REGION_NAME);
+    CENTRAL_REGION.setVertices(vertices);
+  }
 }

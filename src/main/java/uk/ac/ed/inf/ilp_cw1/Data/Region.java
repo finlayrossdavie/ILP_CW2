@@ -14,7 +14,7 @@ public class Region {
   private Position[] vertices;
 
   public static boolean isPointOnLine(Position a, Position b, Position p) {
-    double crossProduct = (p.getLat() - a.getLat()) * (b.getLng() - a.getLng()) -
+    Double crossProduct = (p.getLat() - a.getLat()) * (b.getLng() - a.getLng()) -
         (p.getLng() - a.getLng()) * (b.getLat() - a.getLat());
 
     // Check if the point is on the line by verifying crossProduct is near zero (collinear)
@@ -23,7 +23,7 @@ public class Region {
     }
 
     // Check if the point's longitude is between the endpoints' longitudes
-    double dotProduct = (p.getLng() - a.getLng()) * (p.getLng() - b.getLng()) +
+    Double dotProduct = (p.getLng() - a.getLng()) * (p.getLng() - b.getLng()) +
         (p.getLat() - a.getLat()) * (p.getLat() - b.getLat());
     if (dotProduct > 0) {
       return false;  // If dot product is positive, the point is outside the line segment
@@ -44,7 +44,7 @@ public class Region {
 
       // Continue with the ray-casting logic
       if ((this.vertices[i].getLat() > point.getLat()) != (this.vertices[j].getLat() > point.getLat())) {
-        double intersectLng = this.vertices[i].getLng() +
+        Double intersectLng = this.vertices[i].getLng() +
             (this.vertices[j].getLng() - this.vertices[i].getLng()) *
                 (point.getLat() - this.vertices[i].getLat()) /
                 (this.vertices[j].getLat() - this.vertices[i].getLat());

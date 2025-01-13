@@ -1,15 +1,30 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 import static uk.ac.ed.inf.ilp_cw1.service.Validations.isValid;
 
+import java.util.HashMap;
+import java.util.Map;
 import uk.ac.ed.inf.ilp_cw1.Data.Position;
+import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
+
 
 public class Calculations {
 
-  public static double eucDistance(Position p1, Position p2){
-    double distance = Math.sqrt(Math.pow(p1.getLat()- p2.getLat(),2)+Math.pow(p1.getLng()- p2.getLng(),2));
-
-    return distance;
+  private static final Map<Double, Double[]> PRECOMPUTED_TRIG = new HashMap<>();
+  static {
+    for (Double angle : SystemConstants.ANGLES) {
+      PRECOMPUTED_TRIG.put(angle, new Double[] {
+          Math.sin(Math.toRadians(angle)),
+          Math.cos(Math.toRadians(angle))
+      });
+    }
   }
+
+  public static double eucDistance(Position p1, Position p2) {
+    Double latDiff = p1.getLat() - p2.getLat();
+    Double lngDiff = p1.getLng() - p2.getLng();
+    return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+  }
+
 
   public static Position nextPos(Position p1, Double angle){
 
@@ -17,14 +32,13 @@ public class Calculations {
       return p1;
     }
 
-    double new_lng =  p1.getLng() + 0.00015*Math.sin(angle);
-    double new_lat =  p1.getLat() + 0.00015*Math.cos(angle);
-
+    Double[] trigValues = PRECOMPUTED_TRIG.get(angle);
+    Double newLng = p1.getLng() + 0.00015 * trigValues[0];
+    Double newLat = p1.getLat() + 0.00015 * trigValues[1];
 
     Position result = new Position();
-    result.setLat(new_lat);
-    result.setLng(new_lng);
-
+    result.setLat(newLat);
+    result.setLng(newLng);
     return result;
   }
 
@@ -47,7 +61,7 @@ public class Calculations {
     double epsilon = 1e-6;  // Tolerance for floating-point comparisons
 
     // Calculate the slope difference between points
-    double area = a.getLat() * (b.getLng() - c.getLng()) +
+    Double area = a.getLat() * (b.getLng() - c.getLng()) +
         b.getLat() * (c.getLng() - a.getLng()) +
         c.getLat() * (a.getLng() - b.getLng());
 

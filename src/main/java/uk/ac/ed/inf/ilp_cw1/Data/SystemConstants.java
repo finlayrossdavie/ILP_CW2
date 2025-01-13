@@ -1,5 +1,8 @@
 package uk.ac.ed.inf.ilp_cw1.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class SystemConstants {
 
   /**
@@ -15,12 +18,12 @@ public final class SystemConstants {
   /**
    * the distance a drone can move in 1 iteration
    */
-  public static final double DRONE_MOVE_DISTANCE = 0.00015;
+  public static final Double DRONE_MOVE_DISTANCE = 0.00015;
 
   /**
    * the distance which is considered "close"
    */
-  public static final double DRONE_IS_CLOSE_DISTANCE = 0.00015;
+  public static final Double DRONE_IS_CLOSE_DISTANCE = 0.00015;
 
   /**
    * the maximum moves a drone can make before running out of battery
@@ -35,12 +38,20 @@ public final class SystemConstants {
   /**
    * Longitude AT
    */
-  public static final double APPLETON_LNG = -3.186874;
+  public static final Double APPLETON_LNG = -3.186874;
 
   /**
    * Latitude AT
    */
-  public static final double APPLETON_LAT = 55.944494;
+  public static final Double APPLETON_LAT = 55.944494;
+
+  public static final Position APPLETON_POS;
+
+  static {
+    APPLETON_POS = new Position();
+    APPLETON_POS.setLat(APPLETON_LAT);
+    APPLETON_POS.setLng(APPLETON_LNG);
+  }
   public static final Region CENTRAL_REGION;
 
   static {
@@ -66,4 +77,12 @@ public final class SystemConstants {
     CENTRAL_REGION.setName(CENTRAL_REGION_NAME);
     CENTRAL_REGION.setVertices(vertices);
   }
+
+  public static final Double[] ANGLES = {
+      0.0, 22.5, 45.0, 67.5, 90.0, 112.5, 135.0, 157.5,
+      180.0, 202.5, 225.0, 247.5, 270.0, 292.5, 315.0, 337.5
+  };
+  public static final String RESTAURANT_URL = "https://ilp-rest-2024.azurewebsites.net/restaurants";
+
+
 }

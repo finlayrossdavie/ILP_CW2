@@ -1,5 +1,7 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 
+import static uk.ac.ed.inf.ilp_cw1.Data.SystemConstants.ANGLES;
+
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -7,94 +9,102 @@ import uk.ac.ed.inf.ilp_cw1.Data.Node;
 import uk.ac.ed.inf.ilp_cw1.Data.Position;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
 
-public class CalculatePath {
+import java.util.*;
 
-  public static final double[] ANGLES = {
-      0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5,
-      180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5
-  };
-
-  public Set<Node> getValidNeighbours(Node targetNode){
-    Set<Node> neighbours = new HashSet<>();
+  public class CalculatePath {
 
 
-    for(double angle : ANGLES){
-      Position tempPosition = Calculations.nextPos(targetNode.getPosition(), angle);
+    // Get valid neighboring nodes
+    public static Set<Node> getValidNeighbours(Node targetNode) {
+      Set<Node> neighbours = new HashSet<>();
+      for (Double angle : ANGLES) {
+        Position tempPosition = Calculations.nextPos(targetNode.getPosition(), angle);
 
-      if (!(SystemConstants.CENTRAL_REGION.isInside(tempPosition))){
-        Node tempNode = new Node(targetNode, tempPosition);
-        neighbours.add(tempNode);
+        // Validate position early to avoid unnecessary processing
+        if (Validations.isValid(tempPosition)) {
+          Node tempNode = new Node(targetNode, tempPosition);
+          neighbours.add(tempNode);
+        }
       }
+      return neighbours;
     }
 
-    return neighbours;
-  }
-
-  public Node getLowestFValue(Set<Node> list){
-
-    Node lowestNode = new Node(null, null);
-    lowestNode.setF(100000);
-
-    for(Node item : list){
-      if(item.getF() < lowestNode.getF()){
-        lowestNode = item;
+    // Backtrack from the goal to reconstruct the path
+    public static List<Position> backtrack(Node node) {
+      List<Position> path = new LinkedList<>();
+      while (node != null) {
+        path.add(0, node.getPosition()); // Add to the beginning for correct order
+        node = node.getParent();
       }
+      return path;
     }
 
-    return lowestNode;
-  }
-
-  public Set<Position> backtrack(Node node){
-    Set<Position> path = new HashSet<>();
-    path.add(node.getPosition());
-
-    while(node.getParent()!=null){
-      node = node.getParent();
-      path.add(node.getPosition());
-    }
-    return path;
-  }
-  public Set<Position> astarSearch(Position start, Position end){
-    Set<Position> path = null;
-
-    Node startNode = new Node(null, start);
-    Node endNode = new Node(null, end);
-
-    Set<Node> open_list = new HashSet<>();
-    Set<Node> closed_list = null;
-
-    open_list.add(startNode);
-
-    while (open_list.size() > 0){
-      Node currentNode = getLowestFValue(open_list);
-
-      open_list.remove(currentNode);
-      closed_list.add(currentNode);
-
-      if (end == currentNode.getPosition()){
-        path = backtrack(currentNode);
+    // A* search algorithm with optimized data structures and logic
+    public static List<Position> astarSearch(Position start) {
+      // Validate the starting position
+      if (!Validations.isValid(start)) {
+        throw new IllegalArgumentException("Invalid starting position");
       }
 
-      Set<Node> neighbours = getValidNeighbours(currentNode);
+      Node startNode = new Node(null, start);
+      Position goalPosition = SystemConstants.APPLETON_POS;
 
-      for(Node neighbour : neighbours){
+      // Priority queue with a comparator for lowest F-value
+      PriorityQueue<Node> openList = new PriorityQueue<>(Comparator.comparingDouble(Node::getF));
+      Map<Position, Node> openListMap = new HashMap<>();
+      Map<Position, Node> closedList = new HashMap<>();
 
-        if(closed_list.contains(neighbour)){
-          break;
+      // Initialize start node
+      startNode.setG(0.0);
+      startNode.setH(Calculations.eucDistance(start, goalPosition));
+      startNode.setF(startNode.getG() + startNode.getH());
+      openList.add(startNode);
+      openListMap.put(start, startNode);
+
+
+      while (!openList.isEmpty()) {
+        // Get the node with the lowest F-value
+        Node currentNode = openList.poll();
+        openListMap.remove(currentNode.getPosition());
+        closedList.put(currentNode.getPosition(), currentNode);
+
+        // Check if the goal is reached
+        if (goalPosition.isEqual(currentNode.getPosition())) {
+          System.out.printf("Final Position Found! Lat: %f, Lng: %f", currentNode.getPosition().getLat(), currentNode.getPosition().getLng());
+          return backtrack(currentNode);
         }
 
-        neighbour.setG(currentNode.getG()+Calculations.eucDistance(currentNode.getPosition(), neighbour.getPosition()));
-        neighbour.setH(Calculations.eucDistance(neighbour.getPosition(), end));
-        neighbour.setF(neighbour.getG()+ neighbour.getH());
+        // Process valid neighbors
+        for (Node neighbour : getValidNeighbours(currentNode)) {
+          if (closedList.containsKey(neighbour.getPosition())) {
+            continue; // Skip already processed nodes
+          }
 
-        if(open_list.contains(neighbour)){
-          if(neighbour.getG() > currentNode.getG()){
-            continue;
+          // Calculate tentative G-value
+          Double tentativeG = currentNode.getG() +
+              Calculations.eucDistance(currentNode.getPosition(), neighbour.getPosition());
+
+          // If neighbor not in openList or found a better G-value
+          if (!openListMap.containsKey(neighbour.getPosition()) ||
+              tentativeG < openListMap.get(neighbour.getPosition()).getG()) {
+
+            neighbour.setParent(currentNode);
+            neighbour.setG(tentativeG);
+            neighbour.setH(Calculations.eucDistance(neighbour.getPosition(), goalPosition));
+            neighbour.setF(neighbour.getG() + neighbour.getH());
+
+            // Add neighbor to the open list if not already there
+            if (!openListMap.containsKey(neighbour.getPosition())) {
+              openList.add(neighbour);
+              openListMap.put(neighbour.getPosition(), neighbour);
+              System.out.printf("Added node: Lng: %f Lat: %f Distance to goal: %f \n", neighbour.getPosition().getLng(), neighbour.getPosition().getLat(), Calculations.eucDistance(neighbour.getPosition(), goalPosition));
+            }
+
           }
         }
-        open_list.add(neighbour);
       }
+
+      // If we exit the loop, no path was found
+      throw new RuntimeException("No path found to the target position");
     }
-    return path;
   }
-}

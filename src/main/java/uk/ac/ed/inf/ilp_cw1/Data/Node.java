@@ -4,9 +4,9 @@ public class Node {
   Node parent;
   Position position;
 
-  double g;
-  double h;
-  double f;
+  Double g;
+  Double h;
+  Double f;
 
   public Node(Node parent, Position position){
     this.parent = parent;
@@ -26,26 +26,35 @@ public class Node {
     return parent;
   }
 
-  public double getF() {
+  public Double getF() {
     return f;
   }
 
-  public double getG() {
+  public Double getG() {
     return g;
   }
 
-  public double getH() {
+  public Double getH() {
     return h;
   }
 
-  public void setF(double f) {
+  public void setF(Double f) {
     this.f = f;
   }
 
-  public void setG(double g) {
+  public void setG(Double g) {
     this.g = g;
   }
-  public void setH(double h) {
+  public void setH(Double h) {
     this.h = h;
   }
+
+  public void setParent(Node parent) {
+    this.parent = parent;
+  }
+
+  public void setPosition(Position position) {
+    this.position = position;
+  }
 }
+

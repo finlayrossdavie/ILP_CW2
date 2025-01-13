@@ -11,7 +11,11 @@ public class Validations {
     if (position == null){
       return false;
     }
-    //TODO check out of bounds defintion
+
+    if(position.getLat()==null || position.getLng()==null){
+      return false;
+    }
+    //TODO check out of bounds definition
 
     if ((position.getLat() >= 100) || (position.getLat() <= -100)){
       return false;
@@ -21,7 +25,7 @@ public class Validations {
       return false;
     }
 
-    return position.getLng() != null && position.getLat() != null;
+    return true;
   }
 
   public static boolean isValid(Double angle){

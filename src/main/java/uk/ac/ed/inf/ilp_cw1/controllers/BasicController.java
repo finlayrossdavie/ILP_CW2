@@ -3,14 +3,10 @@ package uk.ac.ed.inf.ilp_cw1.controllers;
 import static uk.ac.ed.inf.ilp_cw1.service.Calculations.collinear;
 import static uk.ac.ed.inf.ilp_cw1.service.Calculations.nextPos;
 import static uk.ac.ed.inf.ilp_cw1.service.Validations.isValid;
-import static uk.ac.ed.inf.ilp_cw1.service.restaurantHandler.fetchRestaurants;
+import static uk.ac.ed.inf.ilp_cw1.service.restHandler.fetchRestaurants;
 
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-import lombok.Getter;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,17 +16,16 @@ import uk.ac.ed.inf.ilp_cw1.Data.LngLatPairRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.NextPositionRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.Order;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
+import uk.ac.ed.inf.ilp_cw1.Data.Region;
 import uk.ac.ed.inf.ilp_cw1.Data.Restaurant;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
 import uk.ac.ed.inf.ilp_cw1.Data.isInRegionRequest;
-import uk.ac.ed.inf.ilp_cw1.Data.Position;
+import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
 import uk.ac.ed.inf.ilp_cw1.service.CalculatePath;
 import uk.ac.ed.inf.ilp_cw1.service.Calculations;
 import uk.ac.ed.inf.ilp_cw1.service.GeoJsonHandler;
-import uk.ac.ed.inf.ilp_cw1.service.OrderValidation;
 import uk.ac.ed.inf.ilp_cw1.service.OrderValidationImpl;
-
-
+import uk.ac.ed.inf.ilp_cw1.service.restHandler;
 
 
 @RestController
@@ -48,12 +43,12 @@ public class BasicController {
 
   @PostMapping("/distanceTo")
   public ResponseEntity<?> distanceTo(@RequestBody LngLatPairRequest request){
-    if (request == null || !isValid(request.getPosition1()) || !isValid(request.getPosition2())){              //TODO: Improve poor input handling, in particular null lat and lng
+    if (request == null || !isValid(request.getLngLat1()) || !isValid(request.getLngLat2())){              //TODO: Improve poor input handling, in particular null lat and lng
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Invalid JSON structure");
     }
 
-    Position p1 = request.getPosition1();
-    Position p2 = request.getPosition2();
+    LngLat p1 = request.getLngLat1();
+    LngLat p2 = request.getLngLat2();
 
     Double distance = Calculations.eucDistance(p1, p2);
 
@@ -63,11 +58,11 @@ public class BasicController {
 
   @PostMapping("/isCloseTo")
   public ResponseEntity<?> isCloseTo(@RequestBody LngLatPairRequest request){
-    if (request == null || !isValid(request.getPosition2()) || !isValid(request.getPosition1())){              //TODO: Improve poor input handling, in particular null lat and lng
+    if (request == null || !isValid(request.getLngLat2()) || !isValid(request.getLngLat1())){              //TODO: Improve poor input handling, in particular null lat and lng
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Invalid JSON structure");
     }
 
-    Double distance = Calculations.eucDistance(request.getPosition1(), request.getPosition2());
+    Double distance = Calculations.eucDistance(request.getLngLat1(), request.getLngLat2());
 
     if (distance < 0.00015){
       return ResponseEntity.status(HttpServletResponse.SC_OK).body(true);
@@ -79,21 +74,21 @@ public class BasicController {
 
   @PostMapping("/nextPosition")
   public ResponseEntity<?> nextPosition(@RequestBody NextPositionRequest nextPositionRequest){
-    if (nextPositionRequest == null || !isValid(nextPositionRequest.getPosition()) || !isValid(nextPositionRequest.getAngle())){
+    if (nextPositionRequest == null || !isValid(nextPositionRequest.getLngLat()) || !isValid(nextPositionRequest.getAngle())){
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Invalid input");
     }
 
-    Position position = nextPositionRequest.getPosition();
+    LngLat lngLat = nextPositionRequest.getLngLat();
     Double angle = nextPositionRequest.getAngle();
 
-    Position result = nextPos(position,angle);
+    LngLat result = nextPos(lngLat,angle);
 
     return ResponseEntity.status(HttpServletResponse.SC_OK).body(result);
   }
 
   @PostMapping("/isInRegion")
   public ResponseEntity<?> isInRegion(@RequestBody isInRegionRequest request){
-    if (request == null || !isValid(request.getPosition()) || !isValid(request.getRegion())){
+    if (request == null || !isValid(request.getLngLat()) || !isValid(request.getRegion())){
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Invalid input");
     }
 
@@ -101,7 +96,7 @@ public class BasicController {
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Points are collinear, thus invalid region");
     }
 
-    return ResponseEntity.status(HttpServletResponse.SC_OK).body(request.getRegion().isInside(request.getPosition()));
+    return ResponseEntity.status(HttpServletResponse.SC_OK).body(request.getRegion().isInside(request.getLngLat()));
 
   }
   @PostMapping("/validateOrder")
@@ -111,7 +106,7 @@ public class BasicController {
 
     Restaurant[] restaurants = null;
 
-    restaurants = fetchRestaurants();
+    restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
 
     if(restaurants == null){
       return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("No response from restaurant website");
@@ -131,7 +126,7 @@ public class BasicController {
 
     Restaurant[] restaurants = null;
 
-    restaurants = fetchRestaurants();
+    restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
 
    if(restaurants == null){
     return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("No response from restaurant website");
@@ -142,8 +137,10 @@ public class BasicController {
      return ResponseEntity.status(HttpServletResponse.SC_OK).body("Order Invalid");
    }
 
+  Region[] noFlyZones = restHandler.fetchNoFlyZones(SystemConstants.NOFLY_URL);
+
    Restaurant targetRestaurant = orderValidator.getOrderRestaurant(request.getPizzasInOrder(), restaurants);
-   List<Position> path = CalculatePath.astarSearch(targetRestaurant.location());
+   List<LngLat> path = CalculatePath.astarSearch(targetRestaurant.location(), noFlyZones);
 
    return ResponseEntity.status(HttpServletResponse.SC_OK).body(path);
   }
@@ -154,7 +151,7 @@ public class BasicController {
 
   Restaurant[] restaurants = null;
 
-  restaurants = fetchRestaurants();
+  restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
 
   if(restaurants == null){
     return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("No response from restaurant website");
@@ -165,8 +162,10 @@ public class BasicController {
     return ResponseEntity.status(HttpServletResponse.SC_OK).body("Order Invalid");
   }
 
+  Region[] noFlyZones = restHandler.fetchNoFlyZones(SystemConstants.NOFLY_URL);
+
   Restaurant targetRestaurant = orderValidator.getOrderRestaurant(request.getPizzasInOrder(), restaurants);
-  List<Position> path = CalculatePath.astarSearch(targetRestaurant.location());
+  List<LngLat> path = CalculatePath.astarSearch(targetRestaurant.location(), noFlyZones);
 
   return ResponseEntity.status(HttpServletResponse.SC_OK).body(GeoJsonHandler.convertToGeoJsonPoints(path));
 

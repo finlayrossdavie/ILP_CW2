@@ -22,12 +22,13 @@ public class OrderValidationImpl implements OrderValidation {
 
     OrderStatus orderStatus = OrderStatus.VALID;
 
-
     if (!(isValidCreditCardNumber(
         orderToValidate.getCreditCardInformation().getCreditCardNumber()))) {
       orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.CARD_NUMBER_INVALID);
     }
+
+
 
     if (!(isValidCVVNumber(orderToValidate.getCreditCardInformation().getCvv()))) {
       orderStatus = OrderStatus.INVALID;
@@ -76,6 +77,8 @@ public class OrderValidationImpl implements OrderValidation {
     }
 
     orderToValidate.setOrderStatus(orderStatus);
+
+
     return orderToValidate;
   }
 
@@ -84,7 +87,7 @@ public class OrderValidationImpl implements OrderValidation {
     if (creditCardNumber.length() != 16) {
       return false;
     }
-    return Integer.parseInt(creditCardNumber) >= 0;
+    return Long.parseLong(creditCardNumber) >= 0;
   }
 
   @Override
@@ -154,7 +157,6 @@ public class OrderValidationImpl implements OrderValidation {
 
   @Override
   public Boolean isCorrectPizzaPrice(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants) {
-
     for (Pizza pizza : pizzasInOrder) {
       Pizza correctPizza = getRestaurantPizzaRecord(pizza, definedRestaurants);
       if (correctPizza == null) {
@@ -164,6 +166,7 @@ public class OrderValidationImpl implements OrderValidation {
       }
     }
     return true;
+
   }
 
 
@@ -178,10 +181,14 @@ public class OrderValidationImpl implements OrderValidation {
       } else if (correctPizza.priceInPence() != pizza.priceInPence()) {
         return false;
       } else {
-        total += total + correctPizza.priceInPence();
+        total += correctPizza.priceInPence();
       }
     }
-    return (total == orderTotal);
+    if((total+100) != orderTotal){
+      System.out.printf("Calculated total: %s Real total: %s", total, orderTotal);
+    }
+
+    return ((total+100) == orderTotal);
   }
 
   /*

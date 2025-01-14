@@ -2,15 +2,15 @@ package uk.ac.ed.inf.ilp_cw1.Data;
 
 public class Node {
   Node parent;
-  Position position;
+  LngLat lngLat;
 
   Double g;
   Double h;
   Double f;
 
-  public Node(Node parent, Position position){
+  public Node(Node parent, LngLat lngLat){
     this.parent = parent;
-    this.position = position;
+    this.lngLat = lngLat;
 
     this.f = 0.0;
     this.g = 0.0;
@@ -18,8 +18,8 @@ public class Node {
 
   }
 
-  public Position getPosition() {
-    return position;
+  public LngLat getPosition() {
+    return lngLat;
   }
 
   public Node getParent() {
@@ -53,8 +53,8 @@ public class Node {
     this.parent = parent;
   }
 
-  public void setPosition(Position position) {
-    this.position = position;
+  public void setPosition(LngLat lngLat) {
+    this.lngLat = lngLat;
   }
 }
 

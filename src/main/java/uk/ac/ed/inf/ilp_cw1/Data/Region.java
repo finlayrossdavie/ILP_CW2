@@ -11,9 +11,9 @@ public class Region {
   private String name;
 
   @JsonProperty("vertices")
-  private Position[] vertices;
+  private LngLat[] vertices;
 
-  public static boolean isPointOnLine(Position a, Position b, Position p) {
+  public static boolean isPointOnLine(LngLat a, LngLat b, LngLat p) {
     Double crossProduct = (p.getLat() - a.getLat()) * (b.getLng() - a.getLng()) -
         (p.getLng() - a.getLng()) * (b.getLat() - a.getLat());
 
@@ -32,7 +32,7 @@ public class Region {
     return true;
   }
 
-  public boolean isInside(Position point) {
+  public boolean isInside(LngLat point) {
     int n = this.vertices.length;
     boolean isInside = false;
 

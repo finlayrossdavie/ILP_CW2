@@ -9,9 +9,9 @@ import lombok.Setter;
 
 public class LngLatPairRequest {
   @JsonProperty("position1")
-  private Position position1;
+  private LngLat lngLat1;
 
   @JsonProperty("position2")
-  private Position position2;
+  private LngLat lngLat2;
 
 }

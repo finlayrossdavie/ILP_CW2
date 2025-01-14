@@ -3,7 +3,7 @@ import static uk.ac.ed.inf.ilp_cw1.service.Validations.isValid;
 
 import java.util.HashMap;
 import java.util.Map;
-import uk.ac.ed.inf.ilp_cw1.Data.Position;
+import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
 
 
@@ -19,14 +19,14 @@ public class Calculations {
     }
   }
 
-  public static double eucDistance(Position p1, Position p2) {
+  public static double eucDistance(LngLat p1, LngLat p2) {
     Double latDiff = p1.getLat() - p2.getLat();
     Double lngDiff = p1.getLng() - p2.getLng();
     return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
   }
 
 
-  public static Position nextPos(Position p1, Double angle){
+  public static LngLat nextPos(LngLat p1, Double angle){
 
     if (angle==900){
       return p1;
@@ -36,13 +36,13 @@ public class Calculations {
     Double newLng = p1.getLng() + 0.00015 * trigValues[0];
     Double newLat = p1.getLat() + 0.00015 * trigValues[1];
 
-    Position result = new Position();
+    LngLat result = new LngLat();
     result.setLat(newLat);
     result.setLng(newLng);
     return result;
   }
 
-  public static boolean collinear(Position[] vertices) {
+  public static boolean collinear(LngLat[] vertices) {
     int n = vertices.length;
 
 
@@ -57,7 +57,7 @@ public class Calculations {
   }
 
 
-  public static boolean areCollinear(Position a, Position b, Position c) {
+  public static boolean areCollinear(LngLat a, LngLat b, LngLat c) {
     double epsilon = 1e-6;  // Tolerance for floating-point comparisons
 
     // Calculate the slope difference between points

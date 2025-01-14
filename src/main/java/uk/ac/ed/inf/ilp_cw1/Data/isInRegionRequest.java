@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class isInRegionRequest {
   @JsonProperty("position")
-  private Position position;
+  private LngLat lngLat;
 
   @JsonProperty("region")
   private Region region;

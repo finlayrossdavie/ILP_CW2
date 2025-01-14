@@ -1,27 +1,27 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 
 
-import uk.ac.ed.inf.ilp_cw1.Data.Position;
+import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
 import uk.ac.ed.inf.ilp_cw1.Data.Region;
 
 public class Validations {
 
-  public static boolean isValid(Position position){
+  public static boolean isValid(LngLat lngLat){
 
-    if (position == null){
+    if (lngLat == null){
       return false;
     }
 
-    if(position.getLat()==null || position.getLng()==null){
+    if(lngLat.getLat()==null || lngLat.getLng()==null){
       return false;
     }
     //TODO check out of bounds definition
 
-    if ((position.getLat() >= 100) || (position.getLat() <= -100)){
+    if ((lngLat.getLat() >= 100) || (lngLat.getLat() <= -100)){
       return false;
     }
 
-    if((position.getLng() > 100) || (position.getLng() <= -100)){
+    if((lngLat.getLng() > 100) || (lngLat.getLng() <= -100)){
       return false;
     }
 
@@ -38,7 +38,7 @@ public class Validations {
 
   public static boolean isValid(Region region) {
 
-    Position[] vertices = region.getVertices();
+    LngLat[] vertices = region.getVertices();
 
     int n = vertices.length;
 /*

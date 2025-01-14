@@ -1,7 +1,5 @@
 package uk.ac.ed.inf.ilp_cw1.Data;
 
-import uk.ac.ed.inf.ilp_cw1.Data.Position;
-
 import java.time.DayOfWeek;
 
 /**
@@ -12,5 +10,5 @@ import java.time.DayOfWeek;
  * @param menu which pizzas are on offer from this restaurant
  * @param openingDays which days of the week is the restaurant open
  */
-public record Restaurant(String name, Position location, DayOfWeek[] openingDays, Pizza[] menu) {
+public record Restaurant(String name, LngLat location, DayOfWeek[] openingDays, Pizza[] menu) {
 }

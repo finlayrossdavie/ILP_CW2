@@ -2,18 +2,17 @@ package uk.ac.ed.inf.ilp_cw1.service;
 import com.mapbox.geojson.*;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import uk.ac.ed.inf.ilp_cw1.Data.Position;
+import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
 
 public class GeoJsonHandler {
 
-  public static List<Point> convertToGeoJsonPoints(List<Position> positions) {
-      if (positions == null || positions.isEmpty()) {
+  public static List<Point> convertToGeoJsonPoints(List<LngLat> lngLats) {
+      if (lngLats == null || lngLats.isEmpty()) {
         throw new IllegalArgumentException("Position list cannot be null or empty.");
       }
 
-      return positions.stream()
+      return lngLats.stream()
           .map(position -> {
             if (position.getLng() == null || position.getLat() == null) {
               throw new IllegalArgumentException("Position must have non-null longitude and latitude values.");
@@ -23,13 +22,13 @@ public class GeoJsonHandler {
           .collect(Collectors.toList());
     }
 
-    public static String mapToGeoJson(List<Position> positions) {
-      if (positions == null || positions.isEmpty()) {
+    public static String mapToGeoJson(List<LngLat> lngLats) {
+      if (lngLats == null || lngLats.isEmpty()) {
         // Return an empty FeatureCollection for better compatibility
         return FeatureCollection.fromFeatures(Collections.emptyList()).toJson();
       }
 
-      List<Point> pointList = convertToGeoJsonPoints(positions);
+      List<Point> pointList = convertToGeoJsonPoints(lngLats);
 
       // Create a LineString from the points
       LineString lineString = LineString.fromLngLats(pointList);

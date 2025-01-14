@@ -1,8 +1,5 @@
 package uk.ac.ed.inf.ilp_cw1.Data;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class SystemConstants {
 
   /**
@@ -45,31 +42,31 @@ public final class SystemConstants {
    */
   public static final Double APPLETON_LAT = 55.944494;
 
-  public static final Position APPLETON_POS;
+  public static final LngLat APPLETON_POS;
 
   static {
-    APPLETON_POS = new Position();
+    APPLETON_POS = new LngLat();
     APPLETON_POS.setLat(APPLETON_LAT);
     APPLETON_POS.setLng(APPLETON_LNG);
   }
   public static final Region CENTRAL_REGION;
 
   static {
-    Position[] vertices = new Position[4];
+    LngLat[] vertices = new LngLat[4];
 
-    vertices[0] = new Position();
+    vertices[0] = new LngLat();
     vertices[0].setLng(-3.192473);
     vertices[0].setLat(55.946233);
 
-    vertices[1] = new Position();
+    vertices[1] = new LngLat();
     vertices[1].setLng(-3.184319);
     vertices[1].setLat(55.946233);
 
-    vertices[2] = new Position();
+    vertices[2] = new LngLat();
     vertices[2].setLng(-3.192473);
     vertices[2].setLat(55.942617);
 
-    vertices[3] = new Position();
+    vertices[3] = new LngLat();
     vertices[3].setLng(-3.184319);
     vertices[3].setLat(55.942617);
 
@@ -83,6 +80,10 @@ public final class SystemConstants {
       180.0, 202.5, 225.0, 247.5, 270.0, 292.5, 315.0, 337.5
   };
   public static final String RESTAURANT_URL = "https://ilp-rest-2024.azurewebsites.net/restaurants";
+public static final String NOFLY_URL = "https://ilp-rest-2024.azurewebsites.net/noFlyZones";
 
+public static final String CENTRALAREA_URL = "https://ilp-rest-2024.azurewebsites.net/centralArea";
+
+public static final String ORDERS_URL = "https://ilp-rest-2024.azurewebsites.net/orders";
 
 }

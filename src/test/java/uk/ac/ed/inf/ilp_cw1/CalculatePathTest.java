@@ -94,7 +94,7 @@ public class CalculatePathTest {
     LngLat test_start = new LngLat();
     test_start.setLat(55.944369);
     test_start.setLng(-3.19026);
-    LngLat end = SystemConstants.APPLETON_POS;
+
 
     // Implement a mock CENTRAL_REGION
     // Call the method
@@ -107,33 +107,36 @@ public class CalculatePathTest {
 
     System.out.printf(path.toString());
   }
-
   @Test
   public void testAStarSearchToGeoJson() {
     // Define test data
-    //LngLat test_start = new LngLat();
+    LngLat test_start = new LngLat();
     //test_start.setLat(55.943284737579376);
     //test_start.setLng(-3.202541470527649);
 
-    LngLat test_start = new LngLat();
-    test_start.setLat(55.945535152517735);
-    test_start.setLng(-3.1912869215011597);
+    //LngLat test_start = new LngLat();
+    //test_start.setLat(55.945535152517735);
+    //test_start.setLng(-3.1912869215011597);
 
-    System.out.printf("Euc Distance: %f", Calculations.eucDistance(test_start, SystemConstants.APPLETON_POS));
+    test_start.setLat(55.944369);
+    test_start.setLng(-3.19026);
+
 
     // Implement a mock CENTRAL_REGION
     // Call the method
 
     Region[] noFlyZones = restHandler.fetchNoFlyZones(SystemConstants.NOFLY_URL);
 
-   // List<LngLat> path = CalculatePath.astarSearch(test_start, noFlyZones);
-   // String result = GeoJsonHandler.mapToGeoJson(path);
+    List<LngLat> path = CalculatePath.astarSearch(test_start, noFlyZones);
+    String result = GeoJsonHandler.mapToGeoJson(path);
 
-    // Assert the path is found
-  //  assertNotNull(result, "The path should not be null.");
-  //  System.out.printf(result);
+    //Assert the path is found
+    assertNotNull(result, "The path should not be null.");
+    System.out.printf(result);
 
   }
+
+
 
 
 }

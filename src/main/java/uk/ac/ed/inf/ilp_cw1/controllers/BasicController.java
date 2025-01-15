@@ -16,6 +16,7 @@ import uk.ac.ed.inf.ilp_cw1.Data.LngLatPairRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.NextPositionRequest;
 import uk.ac.ed.inf.ilp_cw1.Data.Order;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
+import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationResult;
 import uk.ac.ed.inf.ilp_cw1.Data.Region;
 import uk.ac.ed.inf.ilp_cw1.Data.Restaurant;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
@@ -102,22 +103,15 @@ public class BasicController {
   @PostMapping("/validateOrder")
   public ResponseEntity<?> validateOrder(@RequestBody Order request){
     OrderValidationImpl orderValidator = new OrderValidationImpl();
-    Order result = null;
+    Order result;
 
-    Restaurant[] restaurants = null;
+    Restaurant[] restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
 
-    restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
-
-    if(restaurants == null){
-      return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("No response from restaurant website");
-    }
     result = orderValidator.validateOrder(request, restaurants);
 
-    if(result == null){
-     return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("No pizza's found");
-   }
+    OrderValidationResult orderValidationResult = new OrderValidationResult(result.getOrderStatus(), result.getOrderValidationCode());
 
-   return ResponseEntity.status(HttpServletResponse.SC_OK).body(result.getOrderValidationCode());
+   return ResponseEntity.status(HttpServletResponse.SC_OK).body(orderValidationResult);
   }
 @PostMapping("/calcDeliveryPath")
   public ResponseEntity<?> calcDeliveryPath(@RequestBody Order request){
@@ -134,7 +128,7 @@ public class BasicController {
    result = orderValidator.validateOrder(request, restaurants);
 
    if(result.getOrderValidationCode() != OrderValidationCode.NO_ERROR){
-     return ResponseEntity.status(HttpServletResponse.SC_OK).body("Order Invalid");
+     return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body("Order Invalid");
    }
 
   Region[] noFlyZones = restHandler.fetchNoFlyZones(SystemConstants.NOFLY_URL);
@@ -166,8 +160,9 @@ public class BasicController {
 
   Restaurant targetRestaurant = orderValidator.getOrderRestaurant(request.getPizzasInOrder(), restaurants);
   List<LngLat> path = CalculatePath.astarSearch(targetRestaurant.location(), noFlyZones);
+  String pathAsGeoJson = GeoJsonHandler.mapToGeoJson(path);
 
-  return ResponseEntity.status(HttpServletResponse.SC_OK).body(GeoJsonHandler.convertToGeoJsonPoints(path));
+  return ResponseEntity.status(HttpServletResponse.SC_OK).body(pathAsGeoJson);
 
   }
 }

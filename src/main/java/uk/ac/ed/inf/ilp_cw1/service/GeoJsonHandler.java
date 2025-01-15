@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
 
+
+
 public class GeoJsonHandler {
 
   public static List<Point> convertToGeoJsonPoints(List<LngLat> lngLats) {

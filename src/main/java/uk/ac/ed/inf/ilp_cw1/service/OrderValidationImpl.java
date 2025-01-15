@@ -2,12 +2,15 @@ package uk.ac.ed.inf.ilp_cw1.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.cglib.core.Local;
 import uk.ac.ed.inf.ilp_cw1.Data.Order;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderStatus;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
@@ -20,64 +23,78 @@ public class OrderValidationImpl implements OrderValidation {
   @Override
   public Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants) {
 
-    OrderStatus orderStatus = OrderStatus.VALID;
+    if (orderToValidate.getPizzasInOrder().length == 0) {
+      orderToValidate.setOrderValidationCode(OrderValidationCode.EMPTY_ORDER);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
+    }
+
 
     if (!(isValidCreditCardNumber(
         orderToValidate.getCreditCardInformation().getCreditCardNumber()))) {
-      orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.CARD_NUMBER_INVALID);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
-
-
 
     if (!(isValidCVVNumber(orderToValidate.getCreditCardInformation().getCvv()))) {
-      orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.CVV_INVALID);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
 
-    if (!(isValidExpiryDate(orderToValidate.getCreditCardInformation().getCreditCardExpiry()))) {
-      orderStatus = OrderStatus.INVALID;
+    if(!(isOneRestaurant(orderToValidate.getPizzasInOrder(), definedRestaurants))){
+
+      orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
+    }
+
+    if(!(isRestaurantOpen(orderToValidate.getPizzasInOrder(), definedRestaurants, orderToValidate.getOrderDate()))){
+
+      orderToValidate.setOrderValidationCode(OrderValidationCode.RESTAURANT_CLOSED);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
+    }
+
+    if (!(isValidExpiryDate(orderToValidate.getCreditCardInformation().getCreditCardExpiry(), orderToValidate.getOrderDate()))) {
       orderToValidate.setOrderValidationCode(OrderValidationCode.EXPIRY_DATE_INVALID);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
 
     if (!(isValidNumPizzas(orderToValidate.getPizzasInOrder().length))) {
-      orderStatus = OrderStatus.INVALID;
       orderToValidate.setOrderValidationCode(OrderValidationCode.MAX_PIZZA_COUNT_EXCEEDED);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
 
-    if (orderToValidate.getPizzasInOrder().length == 0) {
-      orderStatus = OrderStatus.INVALID;
-      orderToValidate.setOrderValidationCode(OrderValidationCode.EMPTY_ORDER);
-    }
 
     if (!(isValidPizzas(orderToValidate.getPizzasInOrder(), definedRestaurants))) {
-      orderStatus = OrderStatus.INVALID;
+
       orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_NOT_DEFINED);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
 
     if (!(isCorrectPizzaPrice(orderToValidate.getPizzasInOrder(), definedRestaurants))) {
-      orderStatus = OrderStatus.INVALID;
+
       orderToValidate.setOrderValidationCode(OrderValidationCode.PRICE_FOR_PIZZA_INVALID);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
 
     if (!(isTotalCorrect(orderToValidate.getPizzasInOrder(), definedRestaurants,
         orderToValidate.getPriceTotalInPence()))) {
-      orderStatus = OrderStatus.INVALID;
+
       orderToValidate.setOrderValidationCode(OrderValidationCode.TOTAL_INCORRECT);
+      orderToValidate.setOrderStatus(OrderStatus.INVALID);
+      return orderToValidate;
     }
 
-    if(!(isOneRestaurant(orderToValidate.getPizzasInOrder(), definedRestaurants))){
-      orderStatus = OrderStatus.INVALID;
-      orderToValidate.setOrderValidationCode(OrderValidationCode.PIZZA_FROM_MULTIPLE_RESTAURANTS);
-    }
 
-    if(!(isRestaurantOpen(orderToValidate.getPizzasInOrder(), definedRestaurants, orderToValidate.getOrderDate()))){
-      orderStatus = OrderStatus.INVALID;
-      orderToValidate.setOrderValidationCode(OrderValidationCode.RESTAURANT_CLOSED);
-    }
-
-    orderToValidate.setOrderStatus(orderStatus);
-
+    orderToValidate.setOrderValidationCode(OrderValidationCode.NO_ERROR);
+    orderToValidate.setOrderStatus(OrderStatus.VALID);
 
     return orderToValidate;
   }
@@ -87,7 +104,15 @@ public class OrderValidationImpl implements OrderValidation {
     if (creditCardNumber.length() != 16) {
       return false;
     }
-    return Long.parseLong(creditCardNumber) >= 0;
+
+    try{
+      long result = Long.parseLong(creditCardNumber);
+      return result > 0;
+    }
+    catch (NumberFormatException e){
+      return false;
+    }
+
   }
 
   @Override
@@ -95,26 +120,37 @@ public class OrderValidationImpl implements OrderValidation {
     if (CVV.length() != 3) {
       return false;
     } else
-      return Integer.parseInt(CVV) >= 0 && Integer.parseInt(CVV) <= 999;
+      try{
+        return Integer.parseInt(CVV) >= 0 && Integer.parseInt(CVV) <= 999;
+      }
+      catch (NumberFormatException e){
+        return false;
+      }
   }
 
   @Override
-  public Boolean isValidExpiryDate(String expiryDate) {
-
+  public Boolean isValidExpiryDate(String expiryDate, LocalDate orderDate) {
+    // Validate format using regex
     String regex = "^\\d{2}/\\d{2}$";
-
     if (!expiryDate.matches(regex)) {
-      return false; // If the format doesn't match, it's invalid
+      return false;
     }
+
     try {
-      // Parse the date using a formatter
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
-      LocalDate.parse(expiryDate + "/2000", formatter); // Use a leap year for February 29
+      // Parse the date using LocalDate
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yy");
+      YearMonth expiryYearMonth = YearMonth.parse(expiryDate, formatter);
+
+      LocalDate expiryLocalDate = expiryYearMonth.atEndOfMonth();
+
+      return !expiryLocalDate.isBefore(orderDate);
+
     } catch (DateTimeParseException e) {
-      return false; // Parsing failed, date is invalid
+
+      return false;
     }
-    return true;
   }
+
 
   @Override
   public Boolean isValidNumPizzas(int numPizzas) {
@@ -169,7 +205,6 @@ public class OrderValidationImpl implements OrderValidation {
 
   }
 
-
   @Override
   public Boolean isTotalCorrect(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants,
       int orderTotal) {
@@ -184,12 +219,10 @@ public class OrderValidationImpl implements OrderValidation {
         total += correctPizza.priceInPence();
       }
     }
-    if((total+100) != orderTotal){
-      System.out.printf("Calculated total: %s Real total: %s", total, orderTotal);
-    }
 
     return ((total+100) == orderTotal);
   }
+
 
   /*
   Function which returns the restaurant which all pizza's in the order come from. Returns null if

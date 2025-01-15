@@ -1,6 +1,7 @@
 package uk.ac.ed.inf.ilp_cw1.service;
 
 import java.util.HashSet;
+import org.springframework.cglib.core.Local;
 import uk.ac.ed.inf.ilp_cw1.Data.CreditCardInformation;
 import uk.ac.ed.inf.ilp_cw1.Data.Order;
 import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
@@ -40,7 +41,7 @@ public interface OrderValidation {
   Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants);
   Boolean isValidCreditCardNumber(String creditCardNumber);
   Boolean isValidCVVNumber(String CVV);
-  Boolean isValidExpiryDate(String expiryDate);
+  Boolean isValidExpiryDate(String expiryDate, LocalDate orderDate);
   Boolean isValidNumPizzas(int numPizzas);
   Boolean isValidPizzas(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);
   Boolean isCorrectPizzaPrice(Pizza[] pizzasInOrder, Restaurant[] definedRestaurants);

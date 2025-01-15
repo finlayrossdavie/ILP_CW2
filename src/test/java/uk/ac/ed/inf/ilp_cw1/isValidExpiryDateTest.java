@@ -36,6 +36,5 @@ public class isValidExpiryDateTest {
     assertFalse(validator.isValidExpiryDate("01/16", validOrderDate));
     assertFalse(validator.isValidExpiryDate("05/23", validOrderDate));
   }
-
 }
 

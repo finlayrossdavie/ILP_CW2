@@ -154,7 +154,7 @@ public class OrderValidationImpl implements OrderValidation {
 
   @Override
   public Boolean isValidNumPizzas(int numPizzas) {
-    return (numPizzas <= SystemConstants.MAX_PIZZAS_PER_ORDER);
+    return (numPizzas > 0 && numPizzas <= SystemConstants.MAX_PIZZAS_PER_ORDER);
   }
 
   @Override

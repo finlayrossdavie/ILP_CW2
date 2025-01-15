@@ -4,7 +4,6 @@ import static uk.ac.ed.inf.ilp_cw1.service.Calculations.collinear;
 import static uk.ac.ed.inf.ilp_cw1.service.Calculations.nextPos;
 import static uk.ac.ed.inf.ilp_cw1.service.Validations.isValid;
 import static uk.ac.ed.inf.ilp_cw1.service.restHandler.fetchRestaurants;
-
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -12,20 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ed.inf.ilp_cw1.Data.LngLatPairRequest;
-import uk.ac.ed.inf.ilp_cw1.Data.NextPositionRequest;
-import uk.ac.ed.inf.ilp_cw1.Data.Order;
-import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
-import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationResult;
-import uk.ac.ed.inf.ilp_cw1.Data.Region;
-import uk.ac.ed.inf.ilp_cw1.Data.Restaurant;
-import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
-import uk.ac.ed.inf.ilp_cw1.Data.isInRegionRequest;
-import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
-import uk.ac.ed.inf.ilp_cw1.service.CalculatePath;
-import uk.ac.ed.inf.ilp_cw1.service.Calculations;
-import uk.ac.ed.inf.ilp_cw1.service.GeoJsonHandler;
-import uk.ac.ed.inf.ilp_cw1.service.OrderValidationImpl;
+
+import uk.ac.ed.inf.ilp_cw1.Data.*;
+import uk.ac.ed.inf.ilp_cw1.service.*;
+
 import uk.ac.ed.inf.ilp_cw1.service.restHandler;
 
 
@@ -106,7 +95,6 @@ public class BasicController {
     Order result;
 
     Restaurant[] restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
-
     result = orderValidator.validateOrder(request, restaurants);
 
     OrderValidationResult orderValidationResult = new OrderValidationResult(result.getOrderStatus(), result.getOrderValidationCode());
@@ -141,9 +129,9 @@ public class BasicController {
 @PostMapping("/calcDeliveryPathAsGeoJson")
   public ResponseEntity<?> calcDeliveryPathAsGeoJson(@RequestBody Order request){
   OrderValidationImpl orderValidator = new OrderValidationImpl();
-  Order result = null;
+  Order result;
 
-  Restaurant[] restaurants = null;
+  Restaurant[] restaurants;
 
   restaurants = fetchRestaurants(SystemConstants.RESTAURANT_URL);
 

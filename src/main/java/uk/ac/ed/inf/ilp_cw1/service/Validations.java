@@ -15,13 +15,12 @@ public class Validations {
     if(lngLat.getLat()==null || lngLat.getLng()==null){
       return false;
     }
-    //TODO check out of bounds definition
 
-    if ((lngLat.getLat() >= 100) || (lngLat.getLat() <= -100)){
+    if ((lngLat.getLat() >= 57) || (lngLat.getLat() < 56)){
       return false;
     }
 
-    if((lngLat.getLng() > 100) || (lngLat.getLng() <= -100)){
+    if((lngLat.getLng() > -3) || (lngLat.getLng() <= -4)){
       return false;
     }
 
@@ -41,11 +40,7 @@ public class Validations {
     LngLat[] vertices = region.getVertices();
 
     int n = vertices.length;
-/*
-    if (colinear(vertices)){
-      return false;
-    }
-*/
+
     if(n < 3){
       return false;
     }

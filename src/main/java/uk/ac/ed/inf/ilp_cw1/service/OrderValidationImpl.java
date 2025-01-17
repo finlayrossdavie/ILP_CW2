@@ -17,9 +17,14 @@ import uk.ac.ed.inf.ilp_cw1.Data.OrderValidationCode;
 import uk.ac.ed.inf.ilp_cw1.Data.Pizza;
 import uk.ac.ed.inf.ilp_cw1.Data.Restaurant;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
-
+/*
+Implementation of the Order Validation template
+ */
 public class OrderValidationImpl implements OrderValidation {
-
+/*
+Since orders are assumed to only have one error at most, we can return
+the order once an error is found.
+ */
   @Override
   public Order validateOrder(Order orderToValidate, Restaurant[] definedRestaurants) {
 

@@ -95,15 +95,22 @@ public class CalculatePathTest {
     test_start.setLat(55.944369);
     test_start.setLng(-3.19026);
 
+    LngLat far_start = new LngLat();
+
+    far_start.setLat(55.943284737579376);
+    far_start.setLng(-3.202541470527649);
+
 
     // Implement a mock CENTRAL_REGION
     // Call the method
     Region[] noFlyZones = restHandler.fetchNoFlyZones(SystemConstants.NOFLY_URL);
-    List<LngLat> path = CalculatePath.astarSearch(test_start, noFlyZones);
+    List<LngLat> path = CalculatePath.hybridPathfinding(far_start, noFlyZones);
 
     // Assert the path is found and contains the end position
     assertNotNull(path, "The path should not be null.");
     //assertTrue(path.contains(end), "The path should contain the end position.");
+
+    System.out.printf("Small Distance Distance: %f Large Distance: %f", Calculations.eucDistance(test_start, SystemConstants.APPLETON_POS), Calculations.eucDistance(far_start, SystemConstants.APPLETON_POS));
 
     System.out.printf(path.toString());
   }
@@ -111,15 +118,15 @@ public class CalculatePathTest {
   public void testAStarSearchToGeoJson() {
     // Define test data
     LngLat test_start = new LngLat();
-    //test_start.setLat(55.943284737579376);
-    //test_start.setLng(-3.202541470527649);
+    test_start.setLat(55.943284737579376);
+    test_start.setLng(-3.202541470527649);
 
     //LngLat test_start = new LngLat();
     //test_start.setLat(55.945535152517735);
     //test_start.setLng(-3.1912869215011597);
 
-    test_start.setLat(55.944369);
-    test_start.setLng(-3.19026);
+    //test_start.setLat(55.944369);
+    //test_start.setLng(-3.19026);
 
 
     // Implement a mock CENTRAL_REGION
@@ -127,7 +134,7 @@ public class CalculatePathTest {
 
     Region[] noFlyZones = restHandler.fetchNoFlyZones(SystemConstants.NOFLY_URL);
 
-    List<LngLat> path = CalculatePath.astarSearch(test_start, noFlyZones);
+    List<LngLat> path = CalculatePath.hybridPathfinding(test_start, noFlyZones);
     String result = GeoJsonHandler.mapToGeoJson(path);
 
     //Assert the path is found

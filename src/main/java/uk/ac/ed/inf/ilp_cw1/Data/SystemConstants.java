@@ -41,7 +41,9 @@ public final class SystemConstants {
    * Latitude AT
    */
   public static final Double APPLETON_LAT = 55.944494;
-
+  /**
+   * Appleton as a LngLat position
+   **/
   public static final LngLat APPLETON_POS;
 
   static {
@@ -49,6 +51,10 @@ public final class SystemConstants {
     APPLETON_POS.setLat(APPLETON_LAT);
     APPLETON_POS.setLng(APPLETON_LNG);
   }
+
+  public static Region CENTRAL_REGION;
+
+/*
   public static final Region CENTRAL_REGION;
 
   static {
@@ -75,15 +81,30 @@ public final class SystemConstants {
     CENTRAL_REGION.setVertices(vertices);
   }
 
+ */
+
+  /**
+   * The 16 angles outlined in the compass for making a movement
+   */
   public static final Double[] ANGLES = {
       0.0, 22.5, 45.0, 67.5, 90.0, 112.5, 135.0, 157.5,
       180.0, 202.5, 225.0, 247.5, 270.0, 292.5, 315.0, 337.5
   };
+  /**
+   * Location of the restaurant data stored by the ILP service
+   */
   public static final String RESTAURANT_URL = "https://ilp-rest-2024.azurewebsites.net/restaurants";
-public static final String NOFLY_URL = "https://ilp-rest-2024.azurewebsites.net/noFlyZones";
-
-public static final String CENTRALAREA_URL = "https://ilp-rest-2024.azurewebsites.net/centralArea";
-
-public static final String ORDERS_URL = "https://ilp-rest-2024.azurewebsites.net/orders";
+  /**
+   * Location of the no fly-zone data stored by the ILP service
+   */
+  public static final String NOFLY_URL = "https://ilp-rest-2024.azurewebsites.net/noFlyZones";
+  /**
+   * Location of the central area data stored by the ILP service
+   */
+  public static final String CENTRALAREA_URL = "https://ilp-rest-2024.azurewebsites.net/centralArea";
+  /**
+   * Location of the order test data stored by the ILP service
+   */
+  public static final String ORDERS_URL = "https://ilp-rest-2024.azurewebsites.net/orders";
 
 }

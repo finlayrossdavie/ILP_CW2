@@ -6,8 +6,18 @@ import java.util.Map;
 import uk.ac.ed.inf.ilp_cw1.Data.LngLat;
 import uk.ac.ed.inf.ilp_cw1.Data.SystemConstants;
 
+/**
+ * Utility class for performing various calculations relating to
+ * positions
+ */
 
 public class Calculations {
+
+  /**
+   * A precomputed map of trigonometric values (sine and cosine) for specified angles.
+   * This is used for efficient angle-based calculations.
+   * Used to speed up calculations
+   */
 
   private static final Map<Double, Double[]> PRECOMPUTED_TRIG = new HashMap<>();
   static {
@@ -19,13 +29,28 @@ public class Calculations {
     }
   }
 
+  /**
+   * Calculates the Euclidean distance between two points represented as {@code LngLat} objects.
+   *
+   * @param p1 the first point
+   * @param p2 the second point
+   * @return the Euclidean distance between p1 and p2
+   */
+
   public static double eucDistance(LngLat p1, LngLat p2) {
     Double latDiff = p1.getLat() - p2.getLat();
     Double lngDiff = p1.getLng() - p2.getLng();
     return Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
   }
 
-
+  /**
+   * Calculates the next position of a point after moving in a specified direction.
+   * The movement is based on a precomputed trigonometric map for efficiency.
+   *
+   * @param p1    the starting point
+   * @param angle the direction of movement in degrees; if 900, the point does not move
+   * @return a new LngLat object representing the next position
+   */
   public static LngLat nextPos(LngLat p1, Double angle){
 
     if (angle==900){
@@ -41,7 +66,12 @@ public class Calculations {
     result.setLng(newLng);
     return result;
   }
-
+  /**
+   * Checks if all the vertices in a polygon are collinear.
+   *
+   * @param vertices an array of LngLat vertices representing a polygon
+   * @return true if all vertices are collinear, otherwise false
+   */
   public static boolean collinear(LngLat[] vertices) {
     int n = vertices.length;
 
@@ -55,7 +85,16 @@ public class Calculations {
     // Close the polygon by checking the last vertex and the first two vertices
     return areCollinear(vertices[n - 2], vertices[n - 1], vertices[0]);
   }
-
+  /**
+   * Helper function used by the collinear method which
+   * determines if three points are collinear using the area of
+   * the triangle they form.
+   *
+   * @param a the first point
+   * @param b the second point
+   * @param c the third point
+   * @return true if the points are collinear, otherwise false
+   */
 
   public static boolean areCollinear(LngLat a, LngLat b, LngLat c) {
     double epsilon = 1e-6;  // Tolerance for floating-point comparisons
